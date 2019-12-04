@@ -5,7 +5,7 @@ import sys
 import itertools
 
 window_size = [1080, 720]
-fps = 144
+fps = 60
 palette = {'bg': (33, 33, 33), 'boid': (33, 150, 243)}
 boid_radius = 4
 
