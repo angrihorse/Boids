@@ -6,11 +6,10 @@ import itertools
 
 window_size = [1080, 720]
 fps = 60
-palette = {'bg': (33, 33, 33), 'boid': (76, 175, 80), \
-           'separating_vectors': (33, 150, 243), 'highlight': (244, 67, 54)}
+palette = {'bg': (33, 33, 33), 'boid': (33, 150, 243)}
 boid_radius = 4
 
-num_boids = 128
+num_boids = 256
 max_speed = 10
 sight_range, separation_range = 100, 25
 boids = np.zeros((num_boids, 4))
@@ -52,6 +51,21 @@ def update(): # Semi-implicit Euler.
     normalized_velocities = off_limit / speeds[:, np.newaxis][mask]
     boids[:, 2:4][mask] = normalized_velocities * max_speed
 
+    # Apply gravity.
+    boids[:, 2:4] += np.array([0.002, 0.001])
+
+    # Fear mouse clicks.
+    mouse_pressed, _, _ = pygame.mouse.get_pressed()
+    if mouse_pressed:
+        mouse_pos = np.array(pygame.mouse.get_pos())
+        mouse_vectors = boids[:, 0:2] - mouse_pos
+        mouse_distances = np.sum(np.square(mouse_vectors), axis=1)
+        mouse_in_sight = np.logical_and(0 < mouse_distances,  mouse_distances < sight_range**2)
+        boids_mouse = boids[mouse_in_sight]
+        boids_mouse[:, 2:4] += 0.1 * mouse_vectors[mouse_in_sight]
+        boids[mouse_in_sight] = boids_mouse
+
+    # Update position.
     boids[:, 0:2] += boids[:, 2:4]
     boids[:, 0:2] %= window_size
 
