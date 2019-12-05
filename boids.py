@@ -52,7 +52,7 @@ def update(): # Semi-implicit Euler.
     boids[:, 2:4][mask] = normalized_velocities * max_speed
 
     # Apply gravity.
-    boids[:, 2:4] += np.array([0.002, 0.001])
+    # boids[:, 2:4] += np.array([0.002, 0.001])
 
     # Fear mouse clicks.
     mouse_pressed, _, _ = pygame.mouse.get_pressed()
