@@ -7,7 +7,7 @@ import itertools
 window_size = [1080, 720]
 fps = 60
 palette = {'bg': (33, 33, 33), 'boid': (33, 150, 243)}
-boid_radius = 5
+boid_radius = 7
 
 num_boids = 256
 max_speed = 500
@@ -24,7 +24,6 @@ def update(): # Semi-implicit Euler.
     in_sight = np.logical_and(0 < distances,  distances < sight_range**2)
     in_sepatation_range = np.logical_and(0 < distances,  distances < separation_range**2)
 
-    # TODO: Vectorize this for loop.
     for i in range(num_boids):
         neighbors = boids[in_sight[i]]
         if len(neighbors) != 0:
@@ -87,5 +86,8 @@ while True:
 
     for event in pygame.event.get():
         if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        if event.type == KEYDOWN and event.key == K_ESCAPE:
             pygame.quit()
             sys.exit()
