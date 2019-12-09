@@ -7,10 +7,10 @@ import itertools
 window_size = [1080, 720]
 fps = 60
 palette = {'bg': (33, 33, 33), 'boid': (33, 150, 243)}
-boid_radius = 4
+boid_radius = 5
 
 num_boids = 256
-max_speed = 10
+max_speed = 500
 sight_range, separation_range = 100, 25
 boids = np.zeros((num_boids, 4))
 
@@ -31,18 +31,19 @@ def update(): # Semi-implicit Euler.
             # Alignment.
             avg_velocity = np.sum(neighbors[:, 2:4], axis=0) / len(neighbors)
             vel_difference = avg_velocity - boids[i, 2:4]
-            boids[i, 2:4] += vel_difference * 0.01
+            boids[i, 2:4] += avg_velocity * 0.1
 
             # Cohesion.
             avg_position = np.sum(neighbors[:, 0:2], axis=0) / len(neighbors)
             pos_difference = avg_position - boids[i, 0:2]
-            boids[i, 2:4] += pos_difference * 0.005
+            boids[i, 2:4] += pos_difference * 0.1
 
         # Separation.
         intruders = boids[in_sepatation_range[i]]
         if len(intruders) != 0:
             separation_vector = boids[i, 0:2] - np.sum(intruders[:, 0:2], axis=0) / len(intruders)
-            boids[i, 2:4] += separation_vector * 0.05
+            norm_separation_vec = separation_vector / np.linalg.norm(separation_vector)
+            boids[i, 2:4] += 50 * norm_separation_vec
 
     # Limit the speed.
     speeds = np.linalg.norm(boids[:, 2:4], axis=1)
@@ -51,22 +52,20 @@ def update(): # Semi-implicit Euler.
     normalized_velocities = off_limit / speeds[:, np.newaxis][mask]
     boids[:, 2:4][mask] = normalized_velocities * max_speed
 
-    # Apply gravity.
-    # boids[:, 2:4] += np.array([0.002, 0.001])
-
     # Fear mouse clicks.
     mouse_pressed, _, _ = pygame.mouse.get_pressed()
+    mouse_range = 200
     if mouse_pressed:
         mouse_pos = np.array(pygame.mouse.get_pos())
         mouse_vectors = boids[:, 0:2] - mouse_pos
         mouse_distances = np.sum(np.square(mouse_vectors), axis=1)
-        mouse_in_sight = np.logical_and(0 < mouse_distances,  mouse_distances < sight_range**2)
+        mouse_in_sight = np.logical_and(0 < mouse_distances,  mouse_distances < mouse_range**2)
         boids_mouse = boids[mouse_in_sight]
-        boids_mouse[:, 2:4] += 0.1 * mouse_vectors[mouse_in_sight]
+        boids_mouse[:, 2:4] += 10000 * mouse_vectors[mouse_in_sight] / mouse_distances[mouse_in_sight][:, np.newaxis]
         boids[mouse_in_sight] = boids_mouse
 
     # Update position.
-    boids[:, 0:2] += boids[:, 2:4]
+    boids[:, 0:2] += boids[:, 2:4] * 1/fps
     boids[:, 0:2] %= window_size
 
 
