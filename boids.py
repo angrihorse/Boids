@@ -30,7 +30,7 @@ def update(): # Semi-implicit Euler.
             # Alignment.
             avg_velocity = np.sum(neighbors[:, 2:4], axis=0) / len(neighbors)
             vel_difference = avg_velocity - boids[i, 2:4]
-            boids[i, 2:4] += avg_velocity * 0.1
+            boids[i, 2:4] += avg_velocity * 0.05
 
             # Cohesion.
             avg_position = np.sum(neighbors[:, 0:2], axis=0) / len(neighbors)
